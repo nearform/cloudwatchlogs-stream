@@ -1,0 +1,22 @@
+{
+  "name": "cloudwatchlogs-stream",
+  "version": "1.0.0",
+  "description": "Stream interface to AWS CloudWatch Logs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "aws",
+    "cloudwatch",
+    "amazon",
+    "logging"
+  ],
+  "author": "Damian Beresford (npmjs.com/~damianberesford)",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.1.21",
+    "debug": "^2.1.3",
+    "minimist": "^1.1.1"
+  }
+}
