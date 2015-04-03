@@ -1,6 +1,10 @@
 {
   "name": "cloudwatchlogs-stream",
   "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nearform/cloudwatchlogs-stream"
+  },
   "description": "Stream interface to AWS CloudWatch Logs",
   "main": "index.js",
   "scripts": {
