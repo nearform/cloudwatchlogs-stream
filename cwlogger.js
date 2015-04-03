@@ -26,19 +26,38 @@ module.exports = function cwlogger(opts) {
 
   function createLogGroup(logGroupName, cb) {
     var params = {
-      logGroupName: logGroupName
+      logGroupNamePrefix: logGroupName
     };
-    _createLogGroup(params, cb);
+
+    cloudWatchLogs.describeLogGroups(params, function(err, data) {
+      if (err) return cb(err);
+      if (data.logGroups && data.logGroups[0]) {
+        return cb();
+      }
+      params = {
+        logGroupName: logGroupName
+      };
+      _createLogGroup(params, cb);
+    });
   }
 
   function createLogStream(logGroupName, logStreamName, cb) {
     var params = {
       logGroupName: logGroupName,
-      logStreamName: logStreamName
+      logStreamNamePrefix: logStreamName
     };
-    _createLogStream(params, cb);
-  }
+    cloudWatchLogs.describeLogStreams(params, function(err, data) {
+      if (err) return cb(err);
 
+      if (data.logStreams && data.logStreams[0]) {
+        return cb(null, data.logStreams[0].uploadSequenceToken);
+      }
+
+      _createLogStream(params, function(err, data){
+        return cb(err, null); // sequence token null for new stream
+      });
+    });
+  }
 
   var re = /expected sequenceToken is: (\w+)/;
   function putLogEvents(params, cb) {

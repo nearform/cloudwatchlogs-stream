@@ -18,8 +18,9 @@ function CloudWatchLogsStream (opts) {
   var self = this;
   self.cwlogger.createLogGroup(self.logGroupName, function(err) {
     if (err) return self.emit('error', err);
-    self.cwlogger.createLogStream(self.logGroupName, self.logStreamName, function(err) {
+    self.cwlogger.createLogStream(self.logGroupName, self.logStreamName, function(err, sequenceToken) {
       if (err) return self.emit('error', err);
+      self.sequenceToken = sequenceToken;
       self._write = write;
       if (self.firstMsg) {
         self._write(self.firstMsg.chunk, self.firstMsg.encoding, self.firstMsg.done);
