@@ -53,6 +53,10 @@ module.exports = function cwlogger(opts) {
         return cb(null, data.logStreams[0].uploadSequenceToken);
       }
 
+      params = {
+        logGroupName: logGroupName,
+        logStreamName: logStreamName
+      };
       _createLogStream(params, function(err, data){
         return cb(err, null); // sequence token null for new stream
       });
