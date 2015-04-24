@@ -5,15 +5,18 @@ var util = require('util');
 var minimist = require('minimist');
 var debug = require('debug')('cloudwatchlogs');
 var cwlogger = require('./cwlogger.js');
+var Deque = require('collections/deque');
 
 function CloudWatchLogsStream (opts) {
   debug('opts', opts);
   stream.Writable.call(this);
   this.logGroupName = opts.logGroupName;
   this.logStreamName = opts.logStreamName;
+  this.bulkIndex = opts.bulkIndex;
   this.sequenceToken = null;
   this.cwlogger = cwlogger(opts);
   this.firstMsg =  null;
+  this.queue = new Deque();
 
   var self = this;
   self.cwlogger.createLogGroup(self.logGroupName, function(err) {
@@ -32,23 +35,30 @@ util.inherits(CloudWatchLogsStream, stream.Writable);
 
 function write (chunk, encoding, done) {
   var self = this;
-  // TODO - need to batch these! Single events only for testing now..
+
+  self.queue.push({
+    message: chunk.toString(),
+    timestamp: new Date().getTime()
+  });
+
   var params = {
-    logEvents: [{
-      message: chunk.toString(),
-      timestamp: new Date().getTime()
-    }],
+    logEvents: self.queue.toArray(),
     logGroupName: self.logGroupName,
     logStreamName: self.logStreamName,
     sequenceToken: self.sequenceToken
   };
 
-  this.cwlogger.putLogEvents(params, function(err, data) {
-    if (err) return self.emit('error', err);
+  if(typeof self.bulkIndex === 'undefined' || self.queue.length > self.bulkIndex) {
+    this.cwlogger.putLogEvents(params, function(err, data) {
+      if (err) return self.emit('error', err);
 
-    self.sequenceToken = data.nextSequenceToken;
+      self.queue.clear();
+      self.sequenceToken = data.nextSequenceToken;
+      done();
+    });
+  } else {
     done();
-  });
+  }
 }
 
 CloudWatchLogsStream.prototype._write = function (chunk, encoding, done) {
@@ -67,12 +77,14 @@ function main() {
       'region': 'r',
       'logGroupName': 'g',
       'logStreamName': 't',
+      'bulkIndex': 'b'
     }
   });
 
   if (!(argv.accesskey || argv.secretkey || argv.groupname || argv.streamname || argv.region)) {
     console.log('Usage: cloudwatchlogs [-a ACCESS_KEY] [-s SECRET_KEY]\n' +
-                '                         [-r REGION] [-g GROUP_NAME] [-t STREAM_NAME]');
+                '                      [-r REGION] [-g GROUP_NAME] [-t STREAM_NAME]\n' +
+                '                      [-b BULK_INDEX]');
     process.exit(1);
   }
 
