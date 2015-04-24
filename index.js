@@ -48,7 +48,7 @@ function write (chunk, encoding, done) {
     sequenceToken: self.sequenceToken
   };
 
-  if(self.queue.length > self.bulkIndex) {
+  if(typeof self.bulkIndex === 'undefined' || self.queue.length > self.bulkIndex) {
     this.cwlogger.putLogEvents(params, function(err, data) {
       if (err) return self.emit('error', err);
 
