@@ -17,6 +17,8 @@ cloudwatchlogs -h
 
 ## Usage
 
+See `cloudwatchlogs --help`.
+
 Example code:
 
 ```
@@ -26,6 +28,8 @@ var opts = {
   'region': 'REGION',
   'logGroupName': 'GROUP_NAME',
   'logStreamName': 'STREAM_NAME',
+  'bulkIndex': 10,
+  'timeout': 20  // seconds
   };
 var stream = new CloudWatchLogsStream(opts);
 something.pipe(stream)  
