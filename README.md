@@ -38,7 +38,7 @@ something.pipe(stream)
 Example command line:
 
 ```
-tail -f my.log | cloudwatchlogs -a ACCESSKEY -s SECRET_KEY -r REGION -g GROUP_NAME -t STREAM_NAME
+tail -f my.log | cloudwatchlogs -a ACCESSKEY -s SECRET_KEY -r REGION -g GROUP_NAME -t STREAM_NAME -b 20 -o 20
 
 ```
 
